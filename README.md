@@ -15,6 +15,8 @@ L’objectif est de mettre en pratique :
 Ce projet illustre des compétences en **data analysis**, **data visualization** et **reporting interactif**.
 
 ---
+## 🌐 Version en ligne
+🔗 **https://salima225.github.io/dashboard-statistique-r-flexdashboard/**
 
 ## 🇬🇧 Description
 
