@@ -1,0 +1,333 @@
+---
+title: "Dashboard ISSEA"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: ["facebook", "twitter", "menu"]
+    vertical_layout: null
+    logo: logo50x50.png
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(readxl)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(magrittr)
+library(highcharter)
+library(VennDiagram)
+library(wordcloud)
+issea_base <- read_excel("data_alea_issea.xlsx")
+View(issea_base)
+```
+
+ Accueil {data-icon="fa-home"}
+========================================================================
+<div class="header">
+  <h1> **Bienvenue sur la page d'accueil** </h1>
+</div>
+
+
+<style>
+/* styles CSS personnalisés */
+.header { 
+   background-image: linear-gradient(to left, rgba(136, 7, 0, 8),transparent), url('photo_issea.jpg');
+   background-color:#044C93;
+   color: black;
+   padding: 50px;
+   text-align: right;
+   font-size: 20px;
+   font-weight: bold;
+}
+</style>
+
+## Row
+
+### Création de l'ISSEA 
+L’institut Sous-régional de Statistique et d’Economie Appliquée (ISSEA) est une Institution spécialisée de la Communauté Economique et Monétaire de l’Afrique Centrale (CEMAC).
+
+Créé en 1984 à Brazzaville, par la Conférence des Chefs d’Etat de l’UDEAC, aujourd’hui CEMAC, l’Institut a son siège à Yaoundé au Cameroun.
+
+Il s’agit donc d’un établissement public Inter-Etats doté de la personnalité morale et de l’autonomie financière.
+
+De ce fait, il est soumis au droit international public ainsi qu’à tout règlement élaboré en application de ce droit et des dispositions de ses textes organiques.
+
+### Adresse de l'ISSEA 
+Situé rue Pasteur - entre l'école Catholique des Infirmiers et l'école des Sourds-muets (ESADA)
+BP 294 Yaoundé (Rép. du Cameroun)
+
+### Mission de l'ISSEA 
+La formation initiale des cadres statisticiens et économistes ;
+
+Le recyclage et le perfectionnement (formation continue) ;
+La recherche appliquée.
+
+## Column {data-width= 650}
+
+### Création de votre filière
+
+La filière "**Licence en Bases de Données" (L2BD) à l'Institut Sous-régional de Statistique et d'Économie Appliquée (ISSEA)** a été créée en réponse à la demande croissante de compétences en gestion et analyse de données dans la sous-région **CEMAC**.
+Cette Licence en Base de Données et Big Data vise à former des professionnels capables de concevoir, développer et administrer des bases de données, d’extraire des données externes, les structurer et constituer de vastes entrepôts de données (datawarehouse) et développer des applications décisionnelles (datamining, tableaux de bord, rapports, etc.).
+
+
+Généralité  {data-icon="fa-globe"}
+====================================================================
+
+## Row
+
+### Total Etudiants
+
+```{r}
+valueBox(value = length(issea_base$nom), caption = "Total Etudiants", color= "skyblue" , icon = "fa-users")
+```
+### Moyenne S1
+```{r}
+valueBox(value = round( mean(issea_base$moy_s_1),1), caption = "Moyenne S1", color= "green", icon = "fa-bar-chart-o")
+```
+### Moyenne S2
+```{r}
+valueBox(value = round( mean(issea_base$moy_s_2),2), caption = "Moyenne S2", color= "blue", icon = "fa-bar-chart-o")
+```
+### Etudiants sportifs
+```{r}
+valueBox(value = nrow(subset(issea_base, sport=="oui")), caption ="Etudiants sportifs", color= "orange", icon = "fa-solid fa-futbol")
+```
+
+column {data-width=650}
+---------------------------------------------------------------------------
+
+### Graphique 1: Répartion des étudiants par sexe
+
+```{r}
+ggplot(issea_base, aes(x= sexe)) + geom_bar(fill = c("skyblue", "skyblue")) +
+  labs(title = "Répartition des Etudiants sexe", x = "Sexe", y = "Nombre d'Etudiants") + theme_minimal()
+```
+
+
+### Graphique 2: Moyenne générale par classe
+
+
+```{r}
+moyenne<-(issea_base$moy_s_1 + issea_base$moy_s_2)/2
+colors <-c("orange", "brown", "darkgreen", "lightgreen", "blue", "purple","pink")
+ggplot(issea_base, aes(x = classes, y = moyenne)) + 
+  geom_boxplot(fill = colors, color = "black") + 
+  labs( title = "Moyenne Générale par classe", x = "Classe", y="Moyenne Générale", 
+        fill = "classes") + scale_fill_manual(values=colors) + theme_minimal()
+# theme(legend.position = "right, legend.title = element_text(size = 5), legend.text = element_text(size = 4))
+```
+
+column {data-width=650}
+-------------------------------------------------------------------------
+
+### Distribution de l'IMC
+
+```{r}
+ggplot(issea_base, aes(x = imc))+
+  geom_histogram(fill = "lightgreen", color = "black")+ labs(title= "Distribution de l'IMC des Etudiants", x= "IMC", y= "Nombre d'etudiants") + theme_minimal()
+```
+
+### Poids vs Taille 
+
+```{r}
+ggplot(issea_base, aes(x = tailles, y = poids, color = sexe))+ geom_point() + 
+  labs(title = "Poids vs Taille des Etudiants", x = "Taille(m)", y = "Poids(Kg)", color = "Sexe") + scale_color_manual(values = c("Féminin" = "darkorange", "Masculin"="darkgreen")) + theme_minimal()
+```
+
+
+Analyse IMC   {data-icon="fa-dashboard"}
+============================================================================================
+
+## Row
+
+### Moyenne IMC
+
+```{r}
+valueBox(value = round(mean(issea_base$imc),1) , icon = "fa-heartbeat", 
+color= "red")
+
+```
+### Médiane IMC
+
+```{r}
+valueBox(value = round(median(issea_base$imc),2) , icon = "fa-heartbeat", 
+color="yellow")
+
+```
+
+### Ecart-type IMC
+
+```{r}
+valueBox(value = round(sd(issea_base$imc),2) , icon = "fa-heartbeat", 
+color= "purple")
+```
+
+### IMC Maximum
+
+```{r}
+valueBox(value = max(issea_base$imc), color= "black")
+```
+
+column {data-width=350}
+-----------------------------------------------------------------------------
+### Graphique 1: Histogramme des tailles des étudiants
+
+```{r}
+hchart(issea_base$tailles, type = "histogram") %>%
+  hc_xAxis(title = list(text = "Taille")) %>%
+  hc_legend(enabled = FALSE) %>%
+  hc_yAxis(title = list(text = "Nombre d'Etudiants"))
+```
+
+### Graphique 2: Histogramme des poids des étudiants
+
+```{r}
+hchart(issea_base$poids, type = "histogram") %>%
+  hc_xAxis(title = list(text = "Poids")) %>%
+  hc_legend(enabled = FALSE) %>%
+  hc_yAxis(title = list(text = "Nombre d'Etudiants"))
+```
+### Graphique 3: Histogramme de l'IMC des étudiants
+
+```{r}
+hchart(issea_base$imc, type = "histogram") %>%
+  hc_xAxis(title = list(text = "IMC")) %>%
+  hc_legend(enabled = FALSE) %>%
+  hc_yAxis(title = list(text = "Nombre d'Etudiants"))
+```
+column {data-width=650}
+---------------------------------------------------------------------------------
+
+### Graphique 4: Répartition des étudiants selon obésité
+```{r}
+issea_base$tanch_imc <- cut(issea_base$imc, breaks = c(-Inf, 19, 24.9, 30, Inf), labels = c("Insuffisance pondérale","Poids normal", "Surpoids", "Obésité" ))
+hchart(issea_base$tanch_imc, type = "bar")%>%
+  hc_legend(enabled = FALSE)
+```
+### Graphique 5: Nuage de point des tailles en fonction des poids selon l'obésité
+
+```{r}
+highchart() %>%
+  hc_chart(type = "scatter") %>%
+  hc_xAxis(title = list(text = "Taille (m)")) %>%
+  hc_yAxis(title = list(text = "Poids (kg)")) %>%
+  hc_add_series(
+    data = issea_base[issea_base$tanch_imc == "Obésité", ],
+    type = "scatter",
+    hcaes(x = tailles, y = poids),
+    name = "Obésité",
+    marker = list(symbol = "diamond", fillColor = "green")
+  ) %>%
+  hc_add_series(
+    data = issea_base[issea_base$tanch_imc == "Poids normal", ],
+    type = "scatter",
+    hcaes(x = tailles, y = poids),
+    name = "Poids normal",
+    marker = list(symbol = "square", fillColor = "blue")
+  ) %>%
+  hc_add_series(
+    data = issea_base[issea_base$tanch_imc == "Insuffisance pondérale", ],
+    type = "scatter",
+    hcaes(x = tailles, y = poids),
+    name = "Insuffisance pondérale",
+    marker = list(symbol = "circle", fillColor = "red")
+  ) %>%
+  hc_add_series(
+    data = issea_base[issea_base$tanch_imc == "Surpoids", ],
+    type = "scatter",
+    hcaes(x = tailles, y = poids),
+    name = "Surpoids",
+    marker = list(symbol = "triangle", fillColor = "purple")
+  ) %>%
+  hc_legend(enabled = FALSE)
+```
+
+### Graphique 6: Répartition des IMC par sexe
+```{r}
+# Calcul des fréquences par catégorie et sexe
+base_count <- issea_base %>%
+  group_by(tanch_imc, sexe) %>%
+  summarise(frequences = n()) %>%
+  ungroup()
+
+# Création du graphique à bulles divisé et emballé
+hchart(base_count, type = "packedbubble", hcaes(name = sexe, value = frequences, group = tanch_imc)) %>%
+  hc_tooltip(pointFormat = "{point.name}: {point.value}") %>%
+  hc_plotOptions(packedbubble = list(
+    minSize = "30%",
+    maxSize = "120%",
+    zMin = 0,
+    zMax = 100,
+    layoutAlgorithm = list(
+      gravitationalConstant = 0.02,
+      splitSeries = TRUE,
+      seriesInteraction = TRUE,
+      dragBetweenSeries = TRUE,
+      parentNodeLimit = TRUE
+    ),
+    dataLabels = list(
+      enabled = TRUE,
+      format = "{point.name}",
+      filter = list(
+        property = "y",
+        operator = ">",
+        value = 0
+      ),
+      style = list(
+        color = "black",
+        textOutline = "none",
+        fontWeight = "normal"
+      )
+    )
+  ))
+```
+### Graphique 7: Répartition des IMC par classe
+
+```{r}
+obe <- table(issea_base$tanch_imc)
+
+df <- as.data.frame(obe)
+
+# Renommer les colonnes pour plus de clarté
+colnames(df) <- c('category', 'frequences')
+
+#df_count_modalities
+
+category <- as.vector(df['category'])
+
+frequences <- as.vector(df['frequences'])
+
+#category
+
+# Création d'un nuage de mots avec highcharter
+wordcloud <- hchart(df, "wordcloud", hcaes(name = category, weight = frequences))
+
+# Afficher le nuage de mots
+wordcloud
+```
+
+Aide {data-icon="fa-question"}
+=====================================================================
+::: {style="border-radius: 10px;
+  background-image: linear-gradient(to left, transparent);
+  background-color: White;
+  color: black;
+  padding: 32px;
+  text-align: right;
+  font-size: 15px;
+  font-weight: bold;
+  width: 99%;
+  height: 45%;
+  margin: 10px;
+  box-shadow: 10px 10px 10px gray;"}
+<h1 style="vertical-align: bottom;">
+
+**Aide**
+</h1>
+:::
+
+Column {data-height = 200}
+----------------------------------------------------------------------------
+### Objectif App
+### Dydacticel
